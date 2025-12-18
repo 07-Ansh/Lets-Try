@@ -60,8 +60,8 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
 ## 🗺️ Roadmap
 
 - [x] **Operating Systems** Module
-- [ ] **Computer Networks** Module (Coming Soon)
-- [ ] **Databases** Module (Coming Soon)
+- [ ] **Web Development** Module (Coming Soon)
+- [ ] **Data Structures** Module (Coming Soon)
 - [ ] User Progress Persistence
 - [ ] Dark Mode Toggle
 

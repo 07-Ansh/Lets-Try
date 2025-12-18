@@ -99,15 +99,15 @@ function App() {
                 />
 
                 <TopicCard
-                  topic="Computer Networks"
-                  description="Coming soon! TCP/IP, OSI Model, and protocols."
+                  topic="Web Development"
+                  description="Coming soon! HTML, CSS, JavaScript, and React."
                   questionCount={0}
                   onStart={() => { }}
                   disabled
                 />
                 <TopicCard
-                  topic="Databases"
-                  description="Coming soon! SQL, Normalization, Transactions."
+                  topic="Data Structures"
+                  description="Coming soon! Arrays, Trees, Graphs, and Algorithms."
                   questionCount={0}
                   onStart={() => { }}
                   disabled
@@ -139,8 +139,8 @@ function App() {
                       key={opt}
                       onClick={() => setQuestionCount(opt)}
                       className={`py-4 rounded-xl font-bold border-2 transition-all ${questionCount === opt
-                          ? 'border-black bg-black text-white shadow-lg'
-                          : 'border-gray-100 bg-white text-gray-600 hover:border-gray-300 transform hover:-translate-y-0.5'
+                        ? 'border-black bg-black text-white shadow-lg'
+                        : 'border-gray-100 bg-white text-gray-600 hover:border-gray-300 transform hover:-translate-y-0.5'
                         }`}
                     >
                       {opt === 'all' ? 'All Questions' : `${opt} Questions`}
