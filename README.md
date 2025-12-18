@@ -3,7 +3,9 @@
 A modern, interactive quiz application designed to test and improve your knowledge in Computer Science. Built with **React** and **Vite**, featuring a sleek user interface powered by **Tailwind CSS** and smooth animations with **Framer Motion**.
 
 ![Project Status](https://img.shields.io/badge/status-active-success.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://07-ansh.github.io/Lets-Try/)
+
+
 
 ## 🚀 Features
 
@@ -73,6 +75,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4.  Push to the Branch (`git push origin feature/AmazingFeature`)
 5.  Open a Pull Request
 
-## 📄 License
+## © Copyright & Usage
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Copyright (c) 2025 Ansh Sharma. All Rights Reserved.
+
+**STRICTLY PROHIBITED FOR PERSONAL OR COMMERCIAL USE.**
+
+This project is proprietary and confidential. No part of this project, including source code, assets, and design, may be reproduced, distributed, or transmitted in any form or by any means, without the prior written permission of the copyright owner. Unauthorized use is a violation of applicable laws.
