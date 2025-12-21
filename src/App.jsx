@@ -353,6 +353,14 @@ function App() {
             />
           )}
 
+          {screen === 'signup' && (
+            <Signup
+              key="signup"
+              onSwitchToLogin={() => setScreen('login')}
+              onSignupSuccess={() => setScreen('home')}
+            />
+          )}
+
           {screen === 'home' && (
             <AnimatePresence mode="wait">
               {!user ? (
