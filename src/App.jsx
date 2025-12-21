@@ -24,7 +24,7 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Notification State
   const [screen, setScreen] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('screen') || 'login';
+    return params.get('screen') || 'home';
   });
   const [activeSection, setActiveSection] = useState(() => {
     const params = new URLSearchParams(window.location.search);
