@@ -1,41 +1,42 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Book, ArrowRight, Lock } from 'lucide-react';
+import { Play } from 'lucide-react';
 
-const TopicCard = ({ topic, description, questionCount, onStart, disabled = false }) => {
+function TopicCard({ topic, description, questionCount, onStart, disabled = false, compact = false }) {
     return (
-        <motion.button
-            whileHover={!disabled ? { y: -4, backgroundColor: '#ffffff' } : {}}
-            whileTap={!disabled ? { scale: 0.98 } : {}}
-            onClick={!disabled ? onStart : undefined}
-            className={`relative w-full text-left bg-white p-6 rounded-2xl border transition-all duration-300 group
-        ${disabled
-                    ? 'border-gray-100 opacity-60 cursor-not-allowed'
-                    : 'border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md cursor-pointer'
-                }
-      `}
+        <motion.div
+            whileHover={!disabled ? { y: -5 } : {}}
+            onClick={() => !disabled && onStart && onStart()}
+            className={`bg-white rounded-2xl border transition-all ${disabled ? 'opacity-50 border-gray-100 cursor-not-allowed' : 'border-gray-200 hover:border-black hover:shadow-xl cursor-pointer'
+                } ${compact ? 'p-4 flex items-center justify-between gap-4' : 'p-8 flex flex-col h-full'}`}
         >
-            <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-xl ${disabled ? 'bg-gray-100 text-gray-400' : 'bg-black text-white'}`}>
-                    <Book size={24} />
-                </div>
-                {disabled && <Lock size={20} className="text-gray-300" />}
+            <div className={compact ? '' : 'mb-6'}>
+                <h3 className={`font-bold text-gray-900 ${compact ? 'text-lg' : 'text-2xl mb-2'}`}>{topic}</h3>
+                {!compact && <p className="text-gray-500 leading-relaxed">{description}</p>}
             </div>
 
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{topic}</h3>
-            <p className="text-gray-500 mb-6 text-sm leading-relaxed">{description}</p>
-
-            {!disabled && (
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <span className="text-sm font-medium text-gray-500">{questionCount} Questions</span>
-                    <div className="flex items-center gap-2 text-sm font-bold text-black group-hover:gap-3 transition-all">
-                        Start
-                        <ArrowRight size={16} />
+            <div className={`${compact ? 'flex-shrink-0' : 'mt-auto pt-6 flex items-center justify-between'}`}>
+                {!compact && (
+                    <div className="flex items-center gap-2 text-gray-500 font-medium text-sm">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        {questionCount} Questions
                     </div>
-                </div>
-            )}
-        </motion.button>
+                )}
+
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation(); // Prevent double triggering
+                        if (!disabled && onStart) onStart();
+                    }}
+                    disabled={disabled}
+                    className={`${compact ? 'p-3' : 'px-6 py-3'} bg-black text-white rounded-xl font-bold flex items-center gap-2 hover:bg-gray-800 transition-colors ${disabled ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''
+                        }`}
+                >
+                    {compact ? <Play size={18} /> : <>Start Quiz <Play size={18} /></>}
+                </button>
+            </div>
+        </motion.div>
     );
-};
+}
 
 export default TopicCard;

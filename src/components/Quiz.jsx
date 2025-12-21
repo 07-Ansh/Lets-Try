@@ -3,12 +3,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, CheckCircle2, XCircle, AlertCircle, HelpCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playSound } from '../utils/sound';
+import FeedbackBubble from './FeedbackBubble';
 
 const Quiz = ({ questions, onFinish }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [score, setScore] = useState(0);
+
+    const [userAnswers, setUserAnswers] = useState([]);
+
+    if (!questions || questions.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+                <AlertCircle size={48} className="text-red-500 mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900">Oops! No questions found.</h2>
+                <p className="text-gray-500 mt-2">There seems to be an issue loading this quiz.</p>
+                <button
+                    onClick={() => onFinish(0, [])}
+                    className="mt-6 px-6 py-2 bg-black text-white rounded-lg font-bold"
+                >
+                    Go Back
+                </button>
+            </div>
+        );
+    }
 
     const currentQuestion = questions[currentIndex];
     // Calculate progress including current step if answered
@@ -20,7 +39,18 @@ const Quiz = ({ questions, onFinish }) => {
         setSelectedOption(key);
         setIsAnswered(true);
 
-        if (key === currentQuestion.answer) {
+        const isCorrect = key === currentQuestion.answer;
+
+        // Track detailed answer
+        setUserAnswers(prev => [...prev, {
+            question: currentQuestion.question,
+            selectedOption: key,
+            correctAnswer: currentQuestion.answer,
+            isCorrect,
+            explanation: currentQuestion.explanation || "No explanation provided."
+        }]);
+
+        if (isCorrect) {
             setScore(s => s + 1);
             playSound('success');
             confetti({
@@ -39,7 +69,7 @@ const Quiz = ({ questions, onFinish }) => {
             setSelectedOption(null);
             setIsAnswered(false);
         } else {
-            onFinish(score);
+            onFinish(score, userAnswers);
         }
     };
 
@@ -64,13 +94,27 @@ const Quiz = ({ questions, onFinish }) => {
         return "border-gray-100 text-gray-400 opacity-50";
     };
 
+    const handleEndQuiz = () => {
+        if (window.confirm("Are you sure you want to end the quiz early? \nYour current score will be submitted.")) {
+            onFinish(score, userAnswers);
+        }
+    };
+
     return (
         <div className="w-full max-w-6xl mx-auto">
             {/* Progress Bar */}
             <div className="mb-8">
-                <div className="flex justify-between text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
+                <div className="flex justify-between items-end text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
                     <span>Question {currentIndex + 1} / {questions.length}</span>
-                    <span>Score: {score}</span>
+                    <div className="flex items-center gap-4">
+                        <span className="text-black font-bold text-sm">Score: {score}</span>
+                        <button
+                            onClick={handleEndQuiz}
+                            className="text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                        >
+                            End Quiz
+                        </button>
+                    </div>
                 </div>
                 <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
                     <motion.div
@@ -84,7 +128,11 @@ const Quiz = ({ questions, onFinish }) => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 {/* Left Column: Question Card */}
-                <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+                <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm relative">
+                    <FeedbackBubble
+                        isCorrect={selectedOption === currentQuestion.answer}
+                        show={isAnswered}
+                    />
                     <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-8 leading-snug">
                         {currentQuestion.question}
                     </h2>

@@ -1,9 +1,33 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, RotateCcw } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
-const Result = ({ score, total, onRestart }) => {
+const Result = ({ score, total, userAnswers, onRestart }) => {
+    const { user, updateUserHistory } = useUser();
     const percentage = Math.round((score / total) * 100);
+
+    useEffect(() => {
+        if (user) {
+            // Pass score, total, topic, and details
+            updateUserHistory(score, total, 'Operating Systems', userAnswers);
+        }
+    }, []); // Run once on mount
+
+    const getMessage = () => {
+        if (!user) return percentage >= 70 ? "Great Job!" : "Completed";
+
+        if (percentage <= 60) {
+            const suffix = user.gender === 'female' ? 'hojayegi' : 'hojayega';
+            return `Padhle ${user.username} nahi to fail ${suffix}`;
+        }
+
+        if (percentage > 80) {
+            return `Impressive ${user.username}!`;
+        }
+
+        return `Good job ${user.username}!`;
+    };
 
     return (
         <motion.div
@@ -16,7 +40,7 @@ const Result = ({ score, total, onRestart }) => {
             </div>
 
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                {percentage >= 70 ? "Great Job!" : "Completed"}
+                {getMessage()}
             </h2>
             <p className="text-gray-500 mb-8">
                 You scored {score} out of {total}
