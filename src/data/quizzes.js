@@ -80,47 +80,72 @@ const sqlQuestions = [
     { id: 10, question: "Filter groups?", options: [{ key: "A", text: "WHERE" }, { key: "B", text: "HAVING" }, { key: "C", text: "GROUP BY" }, { key: "D", text: "ORDER BY" }], answer: "B", explanation: "HAVING filters aggregated groups; WHERE filters rows." }
 ];
 
+import { Cpu, Database, Network, Globe, Box, FileCode } from 'lucide-react';
+import React from 'react';
+
+// ... (existing imports and multiplyQuestions helper)
+
+// ... (existing questions arrays)
+
 export const allQuizzes = [
     {
         id: 'os',
         title: 'Operating Systems',
         description: 'Processes, threads, scheduling, synchronization.',
         questions: multiplyQuestions(osQuestions, 100),
-        category: 'CS Core'
+        category: 'CS Core',
+        icon: Cpu,
+        color: 'bg-blue-500',
+        gradient: 'from-blue-500 to-indigo-600'
     },
     {
         id: 'dbms',
         title: 'DBMS',
         description: 'ACID, Normalization, SQL, Transactions.',
         questions: multiplyQuestions(dbmsQuestions, 100),
-        category: 'CS Core'
+        category: 'CS Core',
+        icon: Database,
+        color: 'bg-emerald-500',
+        gradient: 'from-emerald-500 to-teal-600'
     },
     {
         id: 'cn',
         title: 'Computer Networks',
         description: 'OSI, TCP/IP, Protocols, Addressing.',
         questions: multiplyQuestions(cnQuestions, 100),
-        category: 'CS Core'
+        category: 'CS Core',
+        icon: Network,
+        color: 'bg-indigo-500',
+        gradient: 'from-indigo-500 to-purple-600'
     },
     {
         id: 'oop',
         title: 'OOP Concepts',
         description: 'Inheritance, Polymorphism, Encapsulation.',
         questions: multiplyQuestions(oopQuestions, 100),
-        category: 'Programming'
+        category: 'Programming',
+        icon: Box,
+        color: 'bg-orange-500',
+        gradient: 'from-orange-500 to-pink-600'
     },
     {
         id: 'java',
         title: 'Java Programming',
         description: 'Syntax, JVM, Exceptions, OOP in Java.',
         questions: multiplyQuestions(javaQuestions, 100),
-        category: 'Language'
+        category: 'Language',
+        icon: FileCode,
+        color: 'bg-red-500',
+        gradient: 'from-red-500 to-rose-600'
     },
     {
         id: 'sql',
         title: 'SQL Fundamentals',
         description: 'Queries, Joins, Constraints, Database logic.',
         questions: multiplyQuestions(sqlQuestions, 100),
-        category: 'Language'
+        category: 'Language',
+        icon: Database,
+        color: 'bg-cyan-500',
+        gradient: 'from-cyan-500 to-blue-600'
     }
 ];

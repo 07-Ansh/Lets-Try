@@ -295,7 +295,7 @@ function Chat({ onBack }) {
     };
 
     return (
-        <div className="flex w-full h-[calc(100vh-73px)] bg-white border-t border-gray-100">
+        <div className="flex w-full h-full md:h-[calc(100vh-73px)] bg-white border-t border-gray-100">
 
             {/* LEFT SIDEBAR: User List / Search */}
             <div className={`${showMobileChat ? 'hidden md:flex' : 'flex'} w-full md:w-[350px] flex-col border-r border-gray-100 bg-gray-50/50`}>

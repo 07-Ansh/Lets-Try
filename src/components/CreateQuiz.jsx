@@ -199,7 +199,7 @@ const CreateQuiz = ({ onBack }) => {
                     ))}
                 </div>
 
-                <div className="flex gap-4 mt-8">
+                <div className="flex flex-col md:flex-row gap-4 mt-8">
                     <button
                         onClick={addQuestion}
                         className="flex-1 py-4 border-2 border-black border-dashed rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50"

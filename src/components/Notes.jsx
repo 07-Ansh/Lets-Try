@@ -368,7 +368,7 @@ export default function Notes() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {/* Notes Rendering */}
                                 {myNotes.map((note) => (
-                                    <div key={note.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group relative aspect-square flex flex-col">
+                                    <div key={note.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group relative md:aspect-square h-44 md:h-auto flex flex-col">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className={`p-3 rounded-xl ${note.type?.startsWith('image/') ? 'bg-blue-50 text-blue-500' : 'bg-red-50 text-red-500'}`}>
                                                 {getFileIcon(note.type)}
@@ -422,7 +422,7 @@ export default function Notes() {
                                     onDragOver={handleDrag}
                                     onDrop={handleDrop}
                                     onClick={triggerUpload}
-                                    className={`border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center p-6 aspect-square cursor-pointer transition-all duration-200 ${dragActive ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                    className={`border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center p-6 md:aspect-square h-32 md:h-auto cursor-pointer transition-all duration-200 ${dragActive ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     {uploading ? (
@@ -467,7 +467,7 @@ export default function Notes() {
                         ) : communityNotes.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {communityNotes.map((note) => (
-                                    <div key={note.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all aspect-square flex flex-col">
+                                    <div key={note.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all md:aspect-square h-56 md:h-auto flex flex-col">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className={`p-3 rounded-xl ${note.type?.startsWith('image/') ? 'bg-blue-50 text-blue-500' : 'bg-red-50 text-red-500'}`}>
                                                 {getFileIcon(note.type)}
