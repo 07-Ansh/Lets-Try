@@ -89,7 +89,15 @@ export default function Notes() {
         }
     }, [user, activeTab]);
 
-    // Observer for Sticky Button
+    // Observer for Sticky Button & Mobile Detection
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
@@ -518,7 +526,7 @@ export default function Notes() {
                 </div>
 
                 <AnimatePresence>
-                    {(showStickyUpload || myNotes.length < 8) && activeTab === 'my-notes' && (
+                    {(showStickyUpload || myNotes.length < 8 || isMobile) && activeTab === 'my-notes' && (
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}

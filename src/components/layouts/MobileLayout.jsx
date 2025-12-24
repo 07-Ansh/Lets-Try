@@ -11,6 +11,7 @@ import Result from '../Result';
 import Login from '../auth/Login';
 import Signup from '../auth/Signup';
 import UserProfile from '../UserProfile';
+import Notes from '../Notes';
 import LandingPage from '../LandingPage';
 import Chat from '../Chat';
 import Settings from '../Settings';
@@ -67,7 +68,7 @@ function MobileLayout({
     };
 
     // Determine if we should show the bottom navigation
-    const isFullScreenTask = ['quiz', 'result', 'config', 'login', 'signup'].includes(screen);
+    const isFullScreenTask = ['quiz', 'result', 'config', 'login', 'signup', 'chat'].includes(screen);
     // Also hide if valid user is not present (Landing Page)
     const showBottomNav = user && !isFullScreenTask;
 
@@ -260,7 +261,7 @@ function MobileLayout({
             </AnimatePresence>
 
             {/* Main Content Area - Scrollable */}
-            <main className={`flex-1 relative w-full touch-pan-y ${screen === 'chat' ? 'overflow-hidden pb-[60px]' : 'overflow-y-auto overflow-x-hidden pb-24'}`}>
+            <main className={`flex-1 relative w-full touch-pan-y ${screen === 'chat' ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden pb-24'}`}>
                 <AnimatePresence mode="wait">
                     {/* Auth Screens */}
                     {screen === 'login' && (

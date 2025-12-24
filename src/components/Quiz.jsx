@@ -333,7 +333,11 @@ const Quiz = ({ questions, onFinish, isMobile }) => {
                         >
                             <div className="flex flex-col gap-6">
                                 <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                                    {selectedOption === currentQuestion.answer ? (
+                                    {selectedOption === null ? (
+                                        <div className="p-2 bg-gray-100 rounded-full text-gray-600">
+                                            <AlertCircle size={24} />
+                                        </div>
+                                    ) : selectedOption === currentQuestion.answer ? (
                                         <div className="p-2 bg-green-100 rounded-full text-green-600">
                                             <CheckCircle2 size={24} />
                                         </div>
@@ -344,9 +348,13 @@ const Quiz = ({ questions, onFinish, isMobile }) => {
                                     )}
                                     <div>
                                         <p className="font-bold text-gray-900 text-lg">
-                                            {selectedOption === currentQuestion.answer ? "Correct!" : "Incorrect"}
+                                            {selectedOption === null
+                                                ? "Smart Decision!"
+                                                : (selectedOption === currentQuestion.answer ? "Correct!" : "Incorrect")}
                                         </p>
-                                        {selectedOption !== currentQuestion.answer && (
+                                        {selectedOption === null ? (
+                                            <p className="text-sm text-gray-500">Better to skip than lose points.</p>
+                                        ) : selectedOption !== currentQuestion.answer && (
                                             <p className="text-sm text-gray-500">Correct Answer: {currentQuestion.answer}</p>
                                         )}
                                     </div>
