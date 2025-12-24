@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Trophy, RotateCcw } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 
-const Result = ({ score, total, userAnswers, onRestart }) => {
+const Result = ({ score, total, userAnswers, onHome, onRetry }) => {
     const { user, updateUserHistory } = useUser();
     const percentage = Math.round((score / total) * 100);
 
@@ -66,13 +66,21 @@ const Result = ({ score, total, userAnswers, onRestart }) => {
                 </div>
             </div>
 
-            <button
-                onClick={onRestart}
-                className="w-full py-4 bg-black text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-all"
-            >
-                <RotateCcw size={18} />
-                Try Again
-            </button>
+            <div className="flex gap-4">
+                <button
+                    onClick={onHome}
+                    className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-200 transition-all"
+                >
+                    Go Home
+                </button>
+                <button
+                    onClick={onRetry}
+                    className="flex-1 py-4 bg-black text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-all"
+                >
+                    <RotateCcw size={18} />
+                    Try Again
+                </button>
+            </div>
         </motion.div>
     );
 };

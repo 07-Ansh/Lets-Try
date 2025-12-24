@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  PenTool, MessageCircle, NotebookPen, User, LogOut, Plus, BookOpen, Settings, Play, ArrowRight, Grid, Menu, X, Search
+  PenTool, MessageCircle, NotebookPen, User, LogOut, Plus, BookOpen, Settings as SettingsIcon, Play, ArrowRight, Grid, Menu, X, Search
 } from 'lucide-react';
 import CreateQuiz from '../CreateQuiz';
 import CommunityQuizzes from '../CommunityQuizzes';
@@ -14,6 +14,9 @@ import UserProfile from '../UserProfile';
 import Notes from '../Notes';
 import LandingPage from '../LandingPage';
 import Chat from '../Chat';
+import Settings from '../Settings';
+import PrivacyPolicy from '../legal/PrivacyPolicy';
+import TermsOfService from '../legal/TermsOfService';
 import NotificationToast from '../NotificationToast';
 import { allQuizzes } from '../../data/quizzes';
 
@@ -49,6 +52,7 @@ function DesktopLayout({
   const [showAllTopics, setShowAllTopics] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   // Search Logic
   const filteredQuizzes = searchQuery
@@ -129,19 +133,101 @@ function DesktopLayout({
 
                   <div className="h-6 w-px bg-gray-200 mx-2"></div>
 
-                  <button
-                    onClick={() => { setScreen('home'); setActiveSection('profile'); }}
-                    className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-full transition-colors"
-                  >
-                    <div className="bg-gray-100 p-2 rounded-full border border-gray-200">
-                      <User size={18} />
-                    </div>
-                    <span className="hover:underline">{user.name}</span>
-                  </button>
+                  {/* Profile Menu Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                      className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-full transition-colors"
+                    >
+                      <div className="bg-gray-100 p-2 rounded-full border border-gray-200">
+                        <User size={18} />
+                      </div>
+                      <span className="font-bold hover:underline">{user?.name}</span>
+                    </button>
+
+                    <AnimatePresence>
+                      {profileMenuOpen && (
+                        <>
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setProfileMenuOpen(false)}
+                            className="fixed inset-0 z-40 bg-transparent"
+                          />
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10, x: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10, x: 20 }}
+                            className="absolute right-0 top-full mt-4 w-64 bg-white rounded-3xl shadow-2xl border border-gray-100 p-2 z-50 origin-top-right overflow-hidden"
+                          >
+                            <div className="p-4 bg-gray-50 rounded-2xl mb-2 flex items-center gap-3">
+                              <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg shadow-md">
+                                {user?.name?.charAt(0)}
+                              </div>
+                              <div className="overflow-hidden">
+                                <h3 className="font-bold text-gray-900 truncate text-sm">{user?.name}</h3>
+                                <p className="text-xs text-gray-500 truncate">View Profile</p>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <button
+                                onClick={() => {
+                                  setProfileMenuOpen(false);
+                                  setScreen('home');
+                                  setActiveSection('profile');
+                                }}
+                                className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors active:scale-95 duration-200"
+                              >
+                                <User size={18} className="text-gray-400" />
+                                My Profile
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  setProfileMenuOpen(false);
+                                  setScreen('notes');
+                                }}
+                                className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors active:scale-95 duration-200"
+                              >
+                                <NotebookPen size={18} className="text-gray-400" />
+                                My Notes
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  setProfileMenuOpen(false);
+                                  setScreen('settings');
+                                }}
+                                className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors active:scale-95 duration-200"
+                              >
+                                <SettingsIcon size={18} className="text-gray-400" />
+                                Settings
+                              </button>
+                            </div>
+
+                            <div className="h-px bg-gray-100 mx-2 my-2" />
+
+                            <button
+                              onClick={() => {
+                                setProfileMenuOpen(false);
+                                handleLogout();
+                              }}
+                              className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors active:scale-95 duration-200"
+                            >
+                              <LogOut size={18} />
+                              Log out
+                            </button>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
                   <button
                     onClick={handleLogout}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors ml-2"
                     title="Logout"
                   >
                     <LogOut size={20} />
@@ -577,6 +663,45 @@ function DesktopLayout({
             </motion.div>
           )}
 
+          {screen === 'settings' && (
+            <motion.div
+              key="settings"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="w-full px-4"
+            >
+              <Settings onBack={() => setScreen('home')} onNavigate={setScreen} />
+            </motion.div>
+          )}
+
+          {screen === 'privacy' && (
+            <motion.div
+              key="privacy"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="w-full px-4"
+            >
+              <PrivacyPolicy onBack={() => setScreen('settings')} />
+            </motion.div>
+          )}
+
+          {screen === 'terms' && (
+            <motion.div
+              key="terms"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="w-full px-4"
+            >
+              <TermsOfService onBack={() => setScreen('settings')} />
+            </motion.div>
+          )}
+
           {screen === 'config' && (
             <motion.div
               key="config"
@@ -590,7 +715,7 @@ function DesktopLayout({
               {/* ... Config JSX (Same as before but wrapped in framer motion) ... */}
               <div className="w-full max-w-xl bg-white rounded-3xl p-10 border border-gray-200 shadow-xl text-center">
                 <div className="inline-flex justify-center items-center p-4 bg-gray-100 rounded-full mb-6">
-                  <Settings size={32} className="text-gray-700" />
+                  <SettingsIcon size={32} className="text-gray-700" />
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Configure Quiz</h2>
                 <p className="text-gray-500 mb-8">How many questions would you like to attempt?</p>
@@ -641,6 +766,7 @@ function DesktopLayout({
               <Quiz
                 questions={quizQuestions}
                 onFinish={finishQuiz}
+                isMobile={false}
               />
             </motion.div>
           )}
@@ -658,7 +784,8 @@ function DesktopLayout({
                 score={score}
                 total={quizQuestions.length}
                 userAnswers={userAnswers}
-                onRestart={restartQuiz}
+                onHome={restartQuiz}
+                onRetry={() => startQuiz(currentTopic)}
               />
             </motion.div>
           )}

@@ -5,7 +5,7 @@ import confetti from 'canvas-confetti';
 import { playSound } from '../utils/sound';
 import FeedbackBubble from './FeedbackBubble';
 
-const Quiz = ({ questions, onFinish }) => {
+const Quiz = ({ questions, onFinish, isMobile }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
     const [isAnswered, setIsAnswered] = useState(false);
@@ -59,8 +59,27 @@ const Quiz = ({ questions, onFinish }) => {
                 origin: { y: 0.6 }
             });
         } else {
+            setScore(s => s - 0.25);
             playSound('error');
         }
+    };
+
+    const handleGiveUp = () => {
+        if (isAnswered) return;
+        setIsAnswered(true);
+        setSelectedOption(null); // No option selected
+        playSound('error'); // Optional: feedback sound
+
+        // Track as skipped/gave up
+        setUserAnswers(prev => [...prev, {
+            question: currentQuestion.question,
+            selectedOption: null,
+            correctAnswer: currentQuestion.answer,
+            isCorrect: false,
+            isSkipped: true,
+            explanation: currentQuestion.explanation || "No explanation provided."
+        }]);
+        // No score deduction for giving up (Skipping)
     };
 
     const handleNext = () => {
@@ -94,16 +113,75 @@ const Quiz = ({ questions, onFinish }) => {
         return "border-gray-100 text-gray-400 opacity-50";
     };
 
+    const [showQuitModal, setShowQuitModal] = useState(false);
+
     const handleEndQuiz = () => {
-        if (window.confirm("Are you sure you want to end the quiz early? \nYour current score will be submitted.")) {
-            onFinish(score, userAnswers);
-        }
+        setShowQuitModal(true);
+    };
+
+    const confirmQuit = () => {
+        setShowQuitModal(false);
+        onFinish(score, userAnswers);
+    };
+
+    const desktopVariants = {
+        initial: { opacity: 0, x: 20 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: 20 }
+    };
+
+    const mobileVariants = {
+        initial: { opacity: 0, y: "100%" },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: "100%" }
     };
 
     return (
-        <div className="w-full max-w-6xl mx-auto">
+        <div className={`w-full max-w-6xl mx-auto relative pb-32 lg:pb-0 ${isMobile ? 'pt-2' : 'pt-0'}`}>
+            <AnimatePresence>
+                {showQuitModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+                        onClick={() => setShowQuitModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-white/20 text-center"
+                        >
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+                                <AlertCircle size={32} />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Give up so soon?</h3>
+                            <p className="text-gray-500 mb-8">
+                                You're doing great! Are you sure you want to quit? Your current score will be saved.
+                            </p>
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => setShowQuitModal(false)}
+                                    className="flex-1 py-3 font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                                >
+                                    Keep Going
+                                </button>
+                                <button
+                                    onClick={confirmQuit}
+                                    className="flex-1 py-3 font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors shadow-lg hover:shadow-red-500/30"
+                                >
+                                    Quit Quiz
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Progress Bar */}
-            <div className="mb-8">
+            <div className={`mb-6 ${isMobile ? 'px-4 pt-6 pb-2' : 'mb-12'}`}>
                 <div className="flex justify-between items-end text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
                     <span>Question {currentIndex + 1} / {questions.length}</span>
                     <div className="flex items-center gap-4">
@@ -126,14 +204,14 @@ const Quiz = ({ questions, onFinish }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 items-start ${isMobile ? 'px-4 mt-5' : 'mt-0'}`}>
                 {/* Left Column: Question Card */}
-                <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm relative">
+                <div className={`lg:col-span-2 bg-white rounded-3xl border border-gray-200 shadow-sm relative ${isMobile ? 'p-5' : 'p-8'}`}>
                     <FeedbackBubble
                         isCorrect={selectedOption === currentQuestion.answer}
-                        show={isAnswered}
+                        show={isAnswered && selectedOption !== null}
                     />
-                    <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-8 leading-snug">
+                    <h2 className={`font-bold text-gray-900 mb-8 leading-snug ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                         {currentQuestion.question}
                     </h2>
 
@@ -143,10 +221,10 @@ const Quiz = ({ questions, onFinish }) => {
                                 key={opt.key}
                                 onClick={() => handleOptionSelect(opt.key)}
                                 disabled={isAnswered}
-                                className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group ${getOptionStyle(opt.key)}`}
+                                className={`w-full text-left rounded-xl border-2 transition-all duration-200 flex items-center justify-between group ${isMobile ? 'p-3' : 'p-4'} ${getOptionStyle(opt.key)}`}
                             >
                                 <div className="flex items-center gap-4">
-                                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border ${isAnswered
+                                    <span className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold border ${isAnswered
                                         ? (opt.key === currentQuestion.answer ? 'bg-green-500 border-green-500 text-white'
                                             : (selectedOption === opt.key ? 'bg-red-500 border-red-500 text-white' : 'border-gray-200 text-gray-400'))
                                         : 'border-gray-200 text-gray-500 group-hover:border-black group-hover:text-black'
@@ -157,74 +235,145 @@ const Quiz = ({ questions, onFinish }) => {
                                 </div>
 
                                 {isAnswered && opt.key === currentQuestion.answer && (
-                                    <CheckCircle2 size={20} className="text-green-500" />
+                                    <CheckCircle2 size={24} className="text-green-500" />
                                 )}
                                 {isAnswered && selectedOption === opt.key && opt.key !== currentQuestion.answer && (
-                                    <XCircle size={20} className="text-red-500" />
+                                    <XCircle size={24} className="text-red-500" />
                                 )}
                             </button>
                         ))}
                     </div>
+
+                    {!isAnswered && (
+                        <div className="mt-8 pt-6 border-t border-gray-100">
+                            <button
+                                onClick={handleGiveUp}
+                                className="w-full py-4 bg-red-500 text-white rounded-xl text-lg font-bold hover:bg-red-600 transition-all duration-300 transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 shadow-lg hover:shadow-red-500/30"
+                            >
+                                <XCircle size={22} />
+                                Give Up
+                            </button>
+                        </div>
+                    )}
                 </div>
 
-                {/* Right Column: Feedback / Explanation Section */}
-                {/* Always occupy space on large screens or float? 
-            Visual choice: If we want it "responsive", it should probably be an AnimatePresence block. 
-            On desktop, it will pop in on the right. On mobile, it will pop in below (due to grid-cols-1).
-        */}
-                <div className="lg:sticky lg:top-24">
-                    <AnimatePresence mode='wait'>
-                        {isAnswered && (
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20 }}
-                                className="bg-white rounded-3xl p-8 border border-gray-200 shadow-lg"
-                            >
-                                <div className="flex flex-col gap-6">
-                                    <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                                        {selectedOption === currentQuestion.answer ? (
-                                            <div className="p-2 bg-green-100 rounded-full text-green-600">
-                                                <CheckCircle2 size={24} />
-                                            </div>
-                                        ) : (
-                                            <div className="p-2 bg-red-100 rounded-full text-red-600">
-                                                <XCircle size={24} />
-                                            </div>
-                                        )}
-                                        <div>
-                                            <p className="font-bold text-gray-900 text-lg">
-                                                {selectedOption === currentQuestion.answer ? "Correct!" : "Incorrect"}
-                                            </p>
-                                            {selectedOption !== currentQuestion.answer && (
-                                                <p className="text-sm text-gray-500">Correct Answer: {currentQuestion.answer}</p>
-                                            )}
-                                        </div>
-                                    </div>
+                {/* Right Column: Status Overlay Only */}
+                <div className="space-y-6 lg:col-span-1 lg:sticky lg:top-6 self-start">
+                    {/* Question Status Palette */}
+                    <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6">
+                        <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wider">Question Overview</h3>
+                        <div className="grid grid-cols-5 gap-3">
+                            {questions.map((_, idx) => {
+                                const answer = userAnswers[idx];
+                                let statusClass = "border-gray-200 text-gray-400"; // Default/Future
 
-                                    <div className="bg-gray-50 p-5 rounded-2xl">
-                                        <div className="flex items-center gap-2 mb-2 text-gray-900 font-semibold">
-                                            <HelpCircle size={18} />
-                                            <span>Explanation</span>
-                                        </div>
-                                        <p className="text-gray-600 leading-relaxed">
-                                            {currentQuestion.explanation || "No additional explanation provided for this question."}
-                                        </p>
-                                    </div>
+                                if (idx === currentIndex && !answer) {
+                                    statusClass = "border-black border-2 text-black font-bold"; // Current Active
+                                } else if (answer) {
+                                    if (answer.isCorrect) {
+                                        statusClass = "bg-green-500 border-green-500 text-white";
+                                    } else {
+                                        statusClass = "bg-red-500 border-red-500 text-white";
+                                    }
+                                } else {
+                                    // Unattempted (Standard)
+                                    statusClass = "bg-white border-2 border-gray-200 text-gray-500";
+                                }
 
-                                    <button
-                                        onClick={handleNext}
-                                        className="w-full bg-black text-white px-8 py-4 rounded-xl font-bold text-base tracking-wide hover:bg-gray-800 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                // User specific request strict override
+                                if (!answer) {
+                                    statusClass = "bg-white border-2 border-black text-black";
+                                } else if (answer.isCorrect) {
+                                    statusClass = "bg-green-500 border-green-500 text-white";
+                                } else {
+                                    statusClass = "bg-red-500 border-red-500 text-white";
+                                }
+
+                                return (
+                                    <div
+                                        key={idx}
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${statusClass}`}
                                     >
-                                        {currentIndex === questions.length - 1 ? "Finish Result" : "Next Question"}
-                                        <ArrowRight size={20} />
-                                    </button>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                                        {idx + 1}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {/* Feedback Section (Popup/Bottom Sheet) */}
+            <AnimatePresence mode='wait'>
+                {isAnswered && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/20 z-40 backdrop-blur-[2px]"
+                        />
+
+                        {/* Desktop Modal vs Mobile Bottom Sheet */}
+                        <motion.div
+                            variants={isMobile ? mobileVariants : {
+                                initial: { opacity: 0, scale: 0.9, x: "-50%", y: "-50%" },
+                                animate: { opacity: 1, scale: 1, x: "-50%", y: "-50%" },
+                                exit: { opacity: 0, scale: 0.9, x: "-50%", y: "-50%" }
+                            }}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className={isMobile
+                                ? "fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[2rem] p-6 border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]"
+                                : "fixed top-1/2 left-1/2 z-50 bg-white rounded-3xl p-8 shadow-2xl w-full max-w-2xl border border-gray-100"
+                            }
+                        >
+                            <div className="flex flex-col gap-6">
+                                <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                                    {selectedOption === currentQuestion.answer ? (
+                                        <div className="p-2 bg-green-100 rounded-full text-green-600">
+                                            <CheckCircle2 size={24} />
+                                        </div>
+                                    ) : (
+                                        <div className="p-2 bg-red-100 rounded-full text-red-600">
+                                            <XCircle size={24} />
+                                        </div>
+                                    )}
+                                    <div>
+                                        <p className="font-bold text-gray-900 text-lg">
+                                            {selectedOption === currentQuestion.answer ? "Correct!" : "Incorrect"}
+                                        </p>
+                                        {selectedOption !== currentQuestion.answer && (
+                                            <p className="text-sm text-gray-500">Correct Answer: {currentQuestion.answer}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="bg-gray-50 p-5 rounded-2xl">
+                                    <div className="flex items-center gap-2 mb-2 text-gray-900 font-semibold">
+                                        <HelpCircle size={18} />
+                                        <span>Explanation</span>
+                                    </div>
+                                    <p className="text-gray-600 leading-relaxed text-sm">
+                                        {currentQuestion.explanation || "No additional explanation provided for this question."}
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={handleNext}
+                                    className="w-full bg-black text-white px-8 py-4 rounded-xl font-bold text-base tracking-wide hover:bg-gray-800 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform active:scale-95"
+                                >
+                                    {currentIndex === questions.length - 1 ? "Finish Result" : "Next Question"}
+                                    <ArrowRight size={20} />
+                                </button>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

@@ -3,6 +3,8 @@ import { useUser } from '../context/UserContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Calendar, Edit2, Save, X, Trophy, Trash2 } from 'lucide-react';
 
+import ConfirmationModal from './ConfirmationModal';
+
 export default function UserProfile({ onBack }) {
     const { user, updateUserProfile, deleteHistoryItem } = useUser();
     const [isEditing, setIsEditing] = useState(false);
@@ -13,6 +15,10 @@ export default function UserProfile({ onBack }) {
     });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+
+    // Modal State
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
 
     if (!user) return null;
 
@@ -29,16 +35,18 @@ export default function UserProfile({ onBack }) {
         }
     };
 
-    const handleDeleteHistory = async (displayIndex) => {
-        if (!confirm("Are you sure you want to delete this history item?")) return;
+    const handleDeleteClick = (displayIndex) => {
+        setItemToDelete(displayIndex);
+        setDeleteModalOpen(true);
+    };
+
+    const confirmDeleteHistory = async () => {
+        if (itemToDelete === null) return;
 
         // Calculate actual index in the original array (since we map reversed)
-        // Original: [0, 1, 2]
-        // Displayed (Reversed): [2, 1, 0]
-        // If I click 0th item in display (which is 2), actual index is length - 1 - 0 = 2.
-        const actualIndex = user.history.length - 1 - displayIndex;
-
+        const actualIndex = user.history.length - 1 - itemToDelete;
         await deleteHistoryItem(actualIndex);
+        setItemToDelete(null);
     };
 
     const formatDate = (isoString) => {
@@ -59,6 +67,15 @@ export default function UserProfile({ onBack }) {
             exit={{ opacity: 0, scale: 0.95 }}
             className="w-full max-w-4xl mx-auto space-y-8"
         >
+            <ConfirmationModal
+                isOpen={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={confirmDeleteHistory}
+                title="Delete History Item?"
+                message="Are you sure you want to delete this quiz attempt from your history? This action cannot be undone."
+                confirmText="Delete"
+            />
+
             {/* Header / Profile Card */}
             <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4">
@@ -234,7 +251,7 @@ export default function UserProfile({ onBack }) {
                                             )}
                                         </div>
                                         <button
-                                            onClick={() => handleDeleteHistory(index)}
+                                            onClick={() => handleDeleteClick(index)}
                                             className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                                             title="Delete from history"
                                         >

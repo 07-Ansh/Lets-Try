@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    PenTool, MessageCircle, NotebookPen, User, LogOut, Plus, BookOpen, Settings, Play, ArrowRight, Grid, Home, List, History, Search
+    PenTool, MessageCircle, NotebookPen, User, LogOut, Plus, BookOpen, Settings as SettingsIcon, Play, ArrowRight, Grid, Home, List, History, Search
 } from 'lucide-react';
 import CreateQuiz from '../CreateQuiz';
 import CommunityQuizzes from '../CommunityQuizzes';
@@ -11,9 +11,11 @@ import Result from '../Result';
 import Login from '../auth/Login';
 import Signup from '../auth/Signup';
 import UserProfile from '../UserProfile';
-import Notes from '../Notes';
 import LandingPage from '../LandingPage';
 import Chat from '../Chat';
+import Settings from '../Settings';
+import PrivacyPolicy from '../legal/PrivacyPolicy';
+import TermsOfService from '../legal/TermsOfService';
 import NotificationToast from '../NotificationToast';
 import { allQuizzes } from '../../data/quizzes';
 
@@ -105,7 +107,7 @@ function MobileLayout({
                             onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                             className="w-10 h-10 bg-gray-50 border border-gray-100 rounded-full flex items-center justify-center font-bold text-sm text-gray-700 active:scale-95 transition-transform"
                         >
-                            {user.name.charAt(0)}
+                            {user?.name?.charAt(0)}
                         </button>
 
                         <AnimatePresence>
@@ -116,38 +118,70 @@ function MobileLayout({
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
                                         onClick={() => setProfileMenuOpen(false)}
-                                        className="fixed inset-0 z-40 bg-black/5"
+                                        className="fixed inset-0 z-40 bg-black/5 backdrop-blur-[2px]"
                                     />
                                     <motion.div
-                                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                        className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50"
+                                        initial={{ opacity: 0, scale: 0.95, y: 10, x: 20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: 10, x: 20 }}
+                                        className="absolute right-0 top-full mt-4 w-64 bg-white rounded-3xl shadow-2xl border border-gray-100 p-2 z-50 origin-top-right overflow-hidden"
                                     >
-                                        <button
-                                            onClick={() => {
-                                                setProfileMenuOpen(false);
-                                                setScreen('home');
-                                                setActiveSection('profile');
-                                            }}
-                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors"
-                                        >
-                                            <div className="p-1.5 bg-green-50 text-green-600 rounded-lg">
-                                                <History size={16} />
+                                        <div className="p-4 bg-gray-50 rounded-2xl mb-2 flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg shadow-md">
+                                                {user?.name?.charAt(0)}
                                             </div>
-                                            History
-                                        </button>
-                                        <div className="h-px bg-gray-50 mx-2 my-1" />
+                                            <div className="overflow-hidden">
+                                                <h3 className="font-bold text-gray-900 truncate text-sm">{user?.name}</h3>
+                                                <p className="text-xs text-gray-500 truncate">View Profile</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <button
+                                                onClick={() => {
+                                                    setProfileMenuOpen(false);
+                                                    setScreen('home');
+                                                    setActiveSection('profile');
+                                                }}
+                                                className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors active:scale-95 duration-200"
+                                            >
+                                                <User size={18} className="text-gray-400" />
+                                                My Profile
+                                            </button>
+
+                                            <button
+                                                onClick={() => {
+                                                    setProfileMenuOpen(false);
+                                                    setScreen('notes');
+                                                }}
+                                                className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors active:scale-95 duration-200"
+                                            >
+                                                <NotebookPen size={18} className="text-gray-400" />
+                                                My Notes
+                                            </button>
+
+                                            <button
+                                                onClick={() => {
+                                                    setProfileMenuOpen(false);
+                                                    setScreen('settings');
+                                                }}
+                                                className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors active:scale-95 duration-200"
+                                            >
+                                                <SettingsIcon size={18} className="text-gray-400" />
+                                                Settings
+                                            </button>
+                                        </div>
+
+                                        <div className="h-px bg-gray-100 mx-2 my-2" />
+
                                         <button
                                             onClick={() => {
                                                 setProfileMenuOpen(false);
                                                 handleLogout();
                                             }}
-                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
+                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors active:scale-95 duration-200"
                                         >
-                                            <div className="p-1.5 bg-red-50 text-red-500 rounded-lg">
-                                                <LogOut size={16} />
-                                            </div>
+                                            <LogOut size={18} />
                                             Log out
                                         </button>
                                     </motion.div>
@@ -389,6 +423,27 @@ function MobileLayout({
                                 </motion.div>
                             )}
 
+                            {/* Settings View */}
+                            {screen === 'settings' && (
+                                <motion.div key="settings" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="p-4">
+                                    <Settings onBack={() => setScreen('home')} onNavigate={setScreen} />
+                                </motion.div>
+                            )}
+
+                            {/* Privacy Policy */}
+                            {screen === 'privacy' && (
+                                <motion.div key="privacy" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="p-4">
+                                    <PrivacyPolicy onBack={() => setScreen('settings')} />
+                                </motion.div>
+                            )}
+
+                            {/* Terms of Service */}
+                            {screen === 'terms' && (
+                                <motion.div key="terms" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="p-4">
+                                    <TermsOfService onBack={() => setScreen('settings')} />
+                                </motion.div>
+                            )}
+
                             {/* Config View */}
                             {screen === 'config' && (
                                 <motion.div
@@ -399,7 +454,7 @@ function MobileLayout({
                                 >
                                     <div className="bg-white rounded-3xl p-6 shadow-2xl border border-gray-100 text-center">
                                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                            <Settings size={32} className="text-gray-700" />
+                                            <SettingsIcon size={32} className="text-gray-700" />
                                         </div>
                                         <h2 className="text-2xl font-bold mb-2">Configure Quiz</h2>
                                         <p className="text-gray-500 mb-8 text-sm">How many questions?</p>
@@ -441,14 +496,14 @@ function MobileLayout({
                             {/* Quiz View */}
                             {screen === 'quiz' && (
                                 <motion.div key="quiz" className="h-full bg-white">
-                                    <Quiz questions={quizQuestions} onFinish={finishQuiz} />
+                                    <Quiz questions={quizQuestions} onFinish={finishQuiz} isMobile={true} />
                                 </motion.div>
                             )}
 
                             {/* Result View */}
                             {screen === 'result' && (
                                 <motion.div key="result" className="h-full bg-white">
-                                    <Result score={score} total={quizQuestions.length} userAnswers={userAnswers} onRestart={restartQuiz} />
+                                    <Result score={score} total={quizQuestions.length} userAnswers={userAnswers} onHome={restartQuiz} onRetry={() => startQuiz(currentTopic)} />
                                 </motion.div>
                             )}
                         </>

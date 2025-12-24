@@ -4,12 +4,17 @@ import { ArrowLeft, Play, User, BookOpen, Trash2 } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { useUser } from '../context/UserContext';
+import ConfirmationModal from './ConfirmationModal';
 
 const CommunityQuizzes = ({ onBack, onPlay }) => {
     const { user } = useUser();
     const [myQuizzes, setMyQuizzes] = useState([]);
     const [otherQuizzes, setOtherQuizzes] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Modal State
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [quizToDelete, setQuizToDelete] = useState(null);
 
     const fetchQuizzes = async () => {
         setLoading(true);
@@ -37,17 +42,23 @@ const CommunityQuizzes = ({ onBack, onPlay }) => {
         fetchQuizzes();
     }, [user]);
 
-    const handleDeleteQuiz = async (quizId) => {
-        if (!confirm("Are you sure you want to delete this quiz? This cannot be undone.")) return;
+    const handleDeleteClick = (quiz) => {
+        setQuizToDelete(quiz);
+        setDeleteModalOpen(true);
+    };
+
+    const executeDelete = async () => {
+        if (!quizToDelete) return;
 
         try {
-            await deleteDoc(doc(db, "quizzes", quizId));
+            await deleteDoc(doc(db, "quizzes", quizToDelete.id));
             // Optimistic update
-            setMyQuizzes(prev => prev.filter(q => q.id !== quizId));
+            setMyQuizzes(prev => prev.filter(q => q.id !== quizToDelete.id));
         } catch (error) {
             console.error("Error deleting quiz:", error);
             alert("Failed to delete quiz.");
         }
+        setQuizToDelete(null);
     };
 
     const QuizCard = ({ quiz, isMine }) => (
@@ -68,7 +79,7 @@ const CommunityQuizzes = ({ onBack, onPlay }) => {
                     </span>
                     {isMine && (
                         <button
-                            onClick={(e) => { e.stopPropagation(); handleDeleteQuiz(quiz.id); }}
+                            onClick={(e) => { e.stopPropagation(); handleDeleteClick(quiz); }}
                             className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete Quiz"
                         >
@@ -100,6 +111,15 @@ const CommunityQuizzes = ({ onBack, onPlay }) => {
 
     return (
         <div className="max-w-7xl mx-auto py-10 px-4 sm:px-8">
+            <ConfirmationModal
+                isOpen={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={executeDelete}
+                title="Delete Quiz?"
+                message={`Are you sure you want to delete "${quizToDelete?.title}"? This cannot be undone.`}
+                confirmText="Delete"
+            />
+
             <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-black mb-8 font-bold transition-colors">
                 <ArrowLeft size={20} /> Back to Menu
             </button>

@@ -1,13 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useUser } from '../context/UserContext';
 import { db, storage } from '../firebase';
 import {
-    collection, addDoc, query, orderBy, onSnapshot,
-    where, serverTimestamp, getDocs, setDoc, doc, getDoc, deleteDoc, Timestamp, increment, updateDoc
+    collection,
+    addDoc,
+    query,
+    where,
+    orderBy,
+    onSnapshot,
+    serverTimestamp,
+    updateDoc,
+    doc,
+    deleteDoc,
+    getDoc,
+    getDocs,
+    increment,
+    Timestamp
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useUser } from '../context/UserContext';
 import { Send, ArrowLeft, Search, User, MessageCircle, Trash2, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+import ConfirmationModal from './ConfirmationModal';
 
 function Chat({ onBack }) {
     const { user } = useUser();
@@ -19,6 +33,13 @@ function Chat({ onBack }) {
     // Data State
     const [chats, setChats] = useState([]); // List of active conversations
     const [messages, setMessages] = useState([]); // Messages in active chat
+
+    // Generic Confirmation Modal State
+    const [confirmation, setConfirmation] = useState({
+        isOpen: false,
+        type: null, // 'chat' or 'message'
+        data: null // id or object
+    });
 
     // Search State
     const [searchTerm, setSearchTerm] = useState('');
@@ -266,36 +287,55 @@ function Chat({ onBack }) {
         }
     };
 
-    // Delete Message
-    const handleDeleteMessage = async (messageId) => {
+    // Requests
+    const handleDeleteMessageClick = (messageId) => {
+        setConfirmation({
+            isOpen: true,
+            type: 'message',
+            data: messageId
+        });
+    };
+
+    const handleDeleteChatClick = () => {
+        setConfirmation({
+            isOpen: true,
+            type: 'chat',
+            data: null
+        });
+    };
+
+    // Execution
+    const executeDelete = async () => {
         if (!activeChat) return;
         const chatId = getChatId(user.uid, activeChat.uid);
 
         try {
-            await deleteDoc(doc(db, 'chats', chatId, 'messages', messageId));
+            if (confirmation.type === 'message') {
+                await deleteDoc(doc(db, 'chats', chatId, 'messages', confirmation.data));
+            } else if (confirmation.type === 'chat') {
+                await deleteDoc(doc(db, 'chats', chatId));
+                setActiveChat(null);
+                setShowMobileChat(false);
+            }
         } catch (error) {
-            console.error("Error deleting message:", error);
-            alert("Failed to delete message.");
-        }
-    };
-
-    // Delete Chat
-    const handleDeleteChat = async () => {
-        if (!activeChat || !window.confirm("Are you sure you want to delete this chat permanently?")) return;
-
-        const chatId = getChatId(user.uid, activeChat.uid);
-        try {
-            await deleteDoc(doc(db, 'chats', chatId));
-            setActiveChat(null);
-            setShowMobileChat(false);
-        } catch (error) {
-            console.error("Error deleting chat:", error);
-            alert("Failed to delete chat.");
+            console.error(`Error deleting ${confirmation.type}:`, error);
+            alert(`Failed to delete ${confirmation.type}.`);
         }
     };
 
     return (
-        <div className="flex w-full h-full md:h-[calc(100vh-73px)] bg-white border-t border-gray-100">
+        <div className="flex w-full h-[100dvh] md:h-[calc(100vh-73px)] bg-white border-t border-gray-100">
+
+            <ConfirmationModal
+                isOpen={confirmation.isOpen}
+                onClose={() => setConfirmation({ ...confirmation, isOpen: false })}
+                onConfirm={executeDelete}
+                title={confirmation.type === 'chat' ? "Delete Chat?" : "Delete Message?"}
+                message={confirmation.type === 'chat'
+                    ? "Are you sure you want to delete this chat permanently? This creates a clean slate for both users."
+                    : "Are you sure you want to delete this message?"}
+                confirmText="Delete"
+            />
 
             {/* LEFT SIDEBAR: User List / Search */}
             <div className={`${showMobileChat ? 'hidden md:flex' : 'flex'} w-full md:w-[350px] flex-col border-r border-gray-100 bg-gray-50/50`}>
@@ -445,7 +485,7 @@ function Chat({ onBack }) {
                                 </p>
                             </div>
                             <button
-                                onClick={handleDeleteChat}
+                                onClick={handleDeleteChatClick}
                                 className="ml-auto p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                 title="Delete Chat"
                             >
@@ -501,8 +541,8 @@ function Chat({ onBack }) {
                                                 </div>
                                                 {isMe && (
                                                     <button
-                                                        onClick={() => handleDeleteMessage(msg.id)}
-                                                        className="opacity-0 group-hover/msg:opacity-100 p-1 text-red-400 hover:text-red-500 transition-opacity"
+                                                        onClick={() => handleDeleteMessageClick(msg.id)}
+                                                        className="opacity-100 md:opacity-0 md:group-hover/msg:opacity-100 p-1 text-red-400 hover:text-red-500 transition-opacity"
                                                         title="Delete"
                                                     >
                                                         <Trash2 size={12} />
